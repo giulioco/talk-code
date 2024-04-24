@@ -79,6 +79,7 @@ def build_directory_tree(owner, repo, token, path="", indent=0, file_paths=[]):
             ]
             if item["name"].endswith((tuple(files_supported))):
                 file_paths.append((indent, item["path"]))
+    print(tree_str)
     return tree_str, file_paths
 
 

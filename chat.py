@@ -2,6 +2,7 @@ import os
 import streamlit as st
 import google.generativeai as genai
 from dotenv import load_dotenv
+from export import parse_github_url, retrieve_github_repo_info
 
 # Load environment variables
 load_dotenv()
@@ -11,13 +12,17 @@ st.set_page_config(
 )
 st.title("Chat with Gemini about your Repo")
 
-# Prompt the user for the repo name
-repo_name = st.text_input("Enter the name of the repo:")
+# Prompt the user for the repo URL
+repo_url = st.text_input("Enter the URL of the GitHub repo:")
 
-if repo_name:
+if repo_url:
+    # Parse the repo URL to get the owner and repo name
+    owner, repo = parse_github_url(repo_url)
+
     # Construct the file path based on the repo name
-    repo_file_path = os.path.join("repos", f"{repo_name}-formatted-prompt.txt")
+    repo_file_path = os.path.join("repos", f"{repo}-formatted-prompt.txt")
 
+    # Check if the repo has been exported
     if os.path.exists(repo_file_path):
         # Read the content of the file
         with open(repo_file_path, "r") as file:
@@ -72,6 +77,18 @@ if repo_name:
                 )
 
     else:
-        st.error(f"File not found: {repo_file_path}")
+        # Display a loader while the repo is being exported
+        with st.spinner("⏳ Fetching your repo..."):
+            # Export the repo
+            formatted_file = retrieve_github_repo_info(
+                repo_url, os.getenv("GITHUB_ACCESS_TOKEN")
+            )
+            output_file_name = f"repos/{repo}-formatted-prompt.txt"
+            with open(output_file_name, "w", encoding="utf-8") as file:
+                file.write(formatted_file)
+            print(f"Repository information has been saved to {output_file_name}")
+
+        # Reload the page to display the chat interface
+        st.experimental_rerun()
 else:
-    st.warning("Please enter the name of the repo.")
+    st.warning("Please enter the URL of the GitHub repo.")
