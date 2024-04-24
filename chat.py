@@ -49,21 +49,22 @@ if repo_name:
             genai.configure(api_key=api_key)
             model = genai.GenerativeModel("gemini-pro")
 
-            # Generate a response using the Gemini API
-            response = model.generate_content(
-                prompt + "\n\n" + file_content + "\n\n" + repo_question
-            )
+            with st.spinner("✋ Wait. Let him cook..."):
+                # Generate a response using the Gemini API
+                response = model.generate_content(
+                    prompt + "\n\n" + file_content + "\n\n" + repo_question, stream=True
+                )
 
-            # Display assistant response in chat message container
-            with st.chat_message("assistant"):
-                for chunk in response:
-                    st.write(chunk.text)
-                st.write()  # Add a newline after the response
+                # Display assistant response in chat message container
+                with st.chat_message("assistant"):
+                    for chunk in response:
+                        st.write(chunk.text)
+                    st.write()  # Add a newline after the response
 
-            # Add assistant response to chat history
-            st.session_state.messages.append(
-                {"role": "assistant", "content": response.text}
-            )
+                # Add assistant response to chat history
+                st.session_state.messages.append(
+                    {"role": "assistant", "content": response.text}
+                )
 
     else:
         st.error(f"File not found: {repo_file_path}")
