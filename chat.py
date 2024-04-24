@@ -50,20 +50,25 @@ if repo_name:
             model = genai.GenerativeModel("gemini-pro")
 
             with st.spinner("✋ Wait. Let him cook..."):
-                # Generate a response using the Gemini API
-                response = model.generate_content(
-                    prompt + "\n\n" + file_content + "\n\n" + repo_question, stream=True
-                )
+                # Create an empty placeholder for the response
+                response_container = st.empty()
 
-                # Display assistant response in chat message container
-                with st.chat_message("assistant"):
-                    for chunk in response:
-                        st.write(chunk.text)
-                    st.write()  # Add a newline after the response
+                # Initialize the response text
+                response_text = ""
+
+                # Generate a response using the Gemini API
+                for chunk in model.generate_content(
+                    prompt + "\n\n" + file_content + "\n\n" + repo_question, stream=True
+                ):
+                    # Append the new chunk to the response text
+                    response_text += chunk.text
+
+                    # Update the response container with the current response text
+                    response_container.markdown(response_text)
 
                 # Add assistant response to chat history
                 st.session_state.messages.append(
-                    {"role": "assistant", "content": response.text}
+                    {"role": "assistant", "content": response_text}
                 )
 
     else:
