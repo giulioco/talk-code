@@ -61,20 +61,24 @@ if repo_url:
                 # Initialize the response text
                 response_text = ""
 
-                # Generate a response using the Gemini API
-                for chunk in model.generate_content(
-                    prompt + "\n\n" + file_content + "\n\n" + repo_question, stream=True
-                ):
-                    # Append the new chunk to the response text
-                    response_text += chunk.text
+                try:
+                    # Generate a response using the Gemini API
+                    for chunk in model.generate_content(
+                        prompt + "\n\n" + file_content + "\n\n" + repo_question,
+                        stream=True,
+                    ):
+                        # Append the new chunk to the response text
+                        response_text += chunk.text
 
-                    # Update the response container with the current response text
-                    response_container.markdown(response_text)
+                        # Update the response container with the current response text
+                        response_container.markdown(response_text)
 
-                # Add assistant response to chat history
-                st.session_state.messages.append(
-                    {"role": "assistant", "content": response_text}
-                )
+                    # Add assistant response to chat history
+                    st.session_state.messages.append(
+                        {"role": "assistant", "content": response_text}
+                    )
+                except Exception as e:
+                    st.error(f"An error occurred: {e}")
 
     else:
         # Display a loader while the repo is being exported
