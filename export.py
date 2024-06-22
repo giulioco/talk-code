@@ -1,13 +1,6 @@
 import requests
 import base64
-import argparse
 from urllib.parse import urlparse
-from dotenv import load_dotenv
-import os
-import subprocess
-
-# Load environment variables
-load_dotenv()
 
 
 def parse_github_url(url):
@@ -95,27 +88,3 @@ def retrieve_github_repo_info(url, token):
         file_content = get_file_content(file_info)
         formatted_string += f"\n{'    ' * indent}{path}:\n{'    ' * indent}```\n{file_content}\n{'    ' * indent}```\n"
     return formatted_string
-
-
-def main():
-    # Setup CLI argument parser
-    parser = argparse.ArgumentParser(
-        description="Retrieve GitHub repository information"
-    )
-    parser.add_argument("url", type=str, help="GitHub repository URL")
-    args = parser.parse_args()
-
-    # Environment variables
-    token = os.getenv("GITHUB_ACCESS_TOKEN")
-
-    output_file_name = f"repos/{parse_github_url(args.url)[1]}-formatted-prompt.txt"
-
-    formatted_repo_info = retrieve_github_repo_info(args.url, token=token)
-    with open(output_file_name, "w", encoding="utf-8") as file:
-        file.write(formatted_repo_info)
-
-    print(f"Repository information has been saved to {output_file_name}")
-
-
-if __name__ == "__main__":
-    main()

@@ -1,21 +1,27 @@
 import os
 import streamlit as st
 import google.generativeai as genai
-from dotenv import load_dotenv
 from export import parse_github_url, retrieve_github_repo_info
-
-# Load environment variables
-load_dotenv()
 
 st.set_page_config(
     page_title="Chat with Gemini about your Repo", page_icon=":robot_face:"
 )
 st.title("Chat with Gemini about your Repo")
 
+# Prompt the user for the API keys
+google_api_key = st.text_input("Enter your Google AI Studio API key:", type="password")
+github_token = st.text_input("Enter your GitHub Access Token:", type="password")
+
+st.markdown(
+    """
+    **Note:** We do not store your API keys. They are only used for this session. You can review the code [here](https://github.com/giulioco/talk-code).
+    """
+)
+
 # Prompt the user for the repo URL
 repo_url = st.text_input("Enter the URL of the GitHub repo:")
 
-if repo_url:
+if google_api_key and github_token and repo_url:
     # Parse the repo URL to get the owner and repo name
     owner, repo = parse_github_url(repo_url)
 
@@ -50,8 +56,7 @@ if repo_url:
                 st.markdown(repo_question)
 
             # Set up the Gemini API key
-            api_key = os.getenv("GOOGLE_AI_STUDIO_API_KEY")
-            genai.configure(api_key=api_key)
+            genai.configure(api_key=google_api_key)
             model = genai.GenerativeModel("gemini-pro")
 
             with st.spinner("✋ Wait. Let him cook..."):
@@ -84,9 +89,7 @@ if repo_url:
         # Display a loader while the repo is being exported
         with st.spinner("⏳ Fetching your repo..."):
             # Export the repo
-            formatted_file = retrieve_github_repo_info(
-                repo_url, os.getenv("GITHUB_ACCESS_TOKEN")
-            )
+            formatted_file = retrieve_github_repo_info(repo_url, github_token)
             output_file_name = f"repos/{repo}-formatted-prompt.txt"
             with open(output_file_name, "w", encoding="utf-8") as file:
                 file.write(formatted_file)
@@ -95,4 +98,9 @@ if repo_url:
         # Reload the page to display the chat interface
         st.experimental_rerun()
 else:
-    st.warning("Please enter the URL of the GitHub repo.")
+    if not google_api_key:
+        st.warning("Please enter your Google AI Studio API key.")
+    if not github_token:
+        st.warning("Please enter your GitHub Access Token.")
+    if not repo_url:
+        st.warning("Please enter the URL of the GitHub repo.")
