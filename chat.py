@@ -9,8 +9,16 @@ st.set_page_config(
 st.title("Chat with Gemini about your Repo")
 
 # Prompt the user for the API keys
-google_api_key = st.text_input("Enter your Google AI Studio API key:", type="password")
-github_token = st.text_input("Enter your GitHub Access Token:", type="password")
+google_api_key = st.text_input(
+    "Enter your Google AI Studio API key:",
+    type="password",
+    help="You can get your API key from [Google AI Studio](https://aistudio.google.com/app/apikey).",
+)
+github_token = st.text_input(
+    "Enter your GitHub Access Token:",
+    type="password",
+    help="You can create a GitHub Access Token by following the instructions [here](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic).",
+)
 
 st.markdown(
     """
@@ -27,6 +35,9 @@ if google_api_key and github_token and repo_url:
 
     # Construct the file path based on the repo name
     repo_file_path = os.path.join("repos", f"{repo}-formatted-prompt.txt")
+
+    # Ensure the directory exists
+    os.makedirs("repos", exist_ok=True)
 
     # Check if the repo has been exported
     if os.path.exists(repo_file_path):
